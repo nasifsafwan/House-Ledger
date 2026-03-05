@@ -30,6 +30,65 @@ House Ledger helps a mess manager and members stay aligned on monthly costs. It 
 - [FAQ](#faq)
 - [Deployment](#deployment)
 
+## User Guide
+
+### Main Flow
+
+```text
+Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
+```
+
+### First-Time Setup
+
+1. Create an account.
+2. Sign in.
+3. Create a new mess as manager, or join one using an invite code.
+4. Open the mess from the mess selection screen.
+
+### Role Guide
+
+| Role | Main actions |
+| --- | --- |
+| Manager | Set monthly costs, update member rent, mark payments, manage settlements |
+| Member | Log meals, review dues, mark self as paid, repay settlements |
+
+### Manager Workflow
+
+<details>
+  <summary><strong>Open manager checklist</strong></summary>
+
+1. Select the month from the dashboard.
+2. Enter the meal unit price in `Quick Settings`.
+3. Add utility and other bill items.
+4. Review the bill breakdown and collection summary.
+5. Update each member's rent for the selected month.
+6. Monitor who has paid and mark payment status.
+7. Create settlements when one member owes another.
+8. Record repayment entries or force-settle if needed.
+
+</details>
+
+### Member Workflow
+
+<details>
+  <summary><strong>Open member checklist</strong></summary>
+
+1. Open the current month.
+2. Log meals from `Quick Meal Log`.
+3. Review rent, bill share, meal cost, and adjusted due.
+4. Mark yourself as paid after sending payment.
+5. Repay open settlements if you owe another member.
+
+</details>
+
+### Mess Access at a Glance
+
+| Action | Result |
+| --- | --- |
+| Create mess | You become the manager and get an invite code |
+| Join with invite code | You become a member of that mess |
+| Open mess card | You are routed to manager or member dashboard based on your role |
+
 ## Features
 
 | Area | What it does |
@@ -105,65 +164,6 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
-
-## User Guide
-
-### Main Flow
-
-```text
-Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
-```
-
-### First-Time Setup
-
-1. Create an account.
-2. Sign in.
-3. Create a new mess as manager, or join one using an invite code.
-4. Open the mess from the mess selection screen.
-
-### Role Guide
-
-| Role | Main actions |
-| --- | --- |
-| Manager | Set monthly costs, update member rent, mark payments, manage settlements |
-| Member | Log meals, review dues, mark self as paid, repay settlements |
-
-### Manager Workflow
-
-<details>
-  <summary><strong>Open manager checklist</strong></summary>
-
-1. Select the month from the dashboard.
-2. Enter the meal unit price in `Quick Settings`.
-3. Add utility and other bill items.
-4. Review the bill breakdown and collection summary.
-5. Update each member's rent for the selected month.
-6. Monitor who has paid and mark payment status.
-7. Create settlements when one member owes another.
-8. Record repayment entries or force-settle if needed.
-
-</details>
-
-### Member Workflow
-
-<details>
-  <summary><strong>Open member checklist</strong></summary>
-
-1. Open the current month.
-2. Log meals from `Quick Meal Log`.
-3. Review rent, bill share, meal cost, and adjusted due.
-4. Mark yourself as paid after sending payment.
-5. Repay open settlements if you owe another member.
-
-</details>
-
-### Mess Access at a Glance
-
-| Action | Result |
-| --- | --- |
-| Create mess | You become the manager and get an invite code |
-| Join with invite code | You become a member of that mess |
-| Open mess card | You are routed to manager or member dashboard based on your role |
 
 ## FAQ
 
