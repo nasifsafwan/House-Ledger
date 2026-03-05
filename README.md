@@ -1,7 +1,7 @@
 # House Ledger
 
 <p align="center">
-  <img src="./frontend/public/logo.png" alt="House Ledger logo" width="110" />
+  <img src="./frontend/public/logo.png" alt="House Ledger logo" width="300" />
 </p>
 
 <p align="center">
