@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-brand-50: oklch(0.97 0.01 250);
+  --color-brand-100: oklch(0.93 0.03 250);
+  --color-brand-500: oklch(0.55 0.15 255);
+  --color-brand-600: oklch(0.48 0.17 255);
+  --color-brand-700: oklch(0.40 0.17 255);
+  --color-success-50: oklch(0.97 0.02 155);
+  --color-success-600: oklch(0.52 0.14 155);
+  --color-danger-50: oklch(0.97 0.02 25);
+  --color-danger-600: oklch(0.55 0.18 25);
+  --color-warn-50: oklch(0.97 0.03 85);
+  --color-warn-600: oklch(0.62 0.16 60);
+}
+
+/* Smooth scrolling and base typography */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium input focus styles */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px oklch(0.55 0.15 255 / 0.15);
+  border-color: oklch(0.55 0.15 255);
+}
+
+/* Button transitions */
+button {
+  transition: all 0.15s ease;
+}

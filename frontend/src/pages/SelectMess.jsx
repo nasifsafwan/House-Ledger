@@ -1,0 +1,97 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
+import Card from "../components/Card";
+import { MessAPI } from "../api/mess";
+
+export default function SelectMess() {
+  const nav = useNavigate();
+  const [memberships, setMemberships] = useState([]);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await MessAPI.myMesses();
+        setMemberships(res.data.memberships || []);
+      } catch (e) {
+        setErr(e?.response?.data?.message || "Failed to load messes");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const open = (m) => {
+    const messId = m.messId?._id;
+    if (!messId) return;
+    if (m.role === "MANAGER") nav(`/manager/${messId}`);
+    else nav(`/member/${messId}`);
+  };
+
+  return (
+    <Layout>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Your Messes</h1>
+        <p className="mt-1 text-sm text-slate-500">Select a mess to view your dashboard</p>
+      </div>
+
+      {err ? (
+        <div className="mb-4 flex items-center gap-2 rounded-xl bg-danger-50 px-4 py-3 text-sm font-medium text-danger-600">
+          <span>⚠️</span> {err}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="py-12 text-center text-slate-400">Loading your messes…</div>
+      ) : memberships.length === 0 ? (
+        <Card icon="📭" title="No messes yet" subtitle="Create or join a mess to get started">
+          <button
+            onClick={() => nav("/choose")}
+            className="mt-2 w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700"
+          >
+            Create or Join a Mess
+          </button>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {memberships.map((m) => (
+            <button
+              key={m._id}
+              onClick={() => open(m)}
+              className="group flex w-full items-center justify-between rounded-2xl border border-slate-200/60 bg-white p-5 text-left shadow-sm transition-all hover:border-brand-200 hover:shadow-md"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-xl transition-colors group-hover:bg-brand-100">
+                  {m.role === "MANAGER" ? "👑" : "👤"}
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900">{m.messId?.name}</div>
+                  <div className="mt-0.5 flex items-center gap-2 text-sm text-slate-500">
+                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${m.role === "MANAGER"
+                        ? "bg-warn-50 text-warn-600"
+                        : "bg-brand-50 text-brand-600"
+                      }`}>
+                      {m.role}
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-mono text-xs">{m.messId?.inviteCode}</span>
+                  </div>
+                </div>
+              </div>
+              <span className="text-slate-300 transition-colors group-hover:text-brand-600">→</span>
+            </button>
+          ))}
+
+          <button
+            onClick={() => nav("/choose")}
+            className="w-full rounded-xl border-2 border-dashed border-slate-200 px-4 py-4 text-sm font-medium text-slate-500 transition-all hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600"
+          >
+            + Create or Join another mess
+          </button>
+        </div>
+      )}
+    </Layout>
+  );
+}
