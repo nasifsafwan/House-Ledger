@@ -1,7 +1,7 @@
-# House Ledger
+# House Ledger - by Nasif Safwan
 
 <p align="center">
-  <img src="./frontend/public/logo.png" alt="House Ledger logo" width="300" />
+  <img src="./frontend/public/logo.png" alt="House Ledger logo" width="500" />
 </p>
 
 <p align="center">
