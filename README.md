@@ -1,6 +1,6 @@
 # 🍽️ Mess Manager
 
-![Banner Image](https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop)
+![Banner Image](logo.jpg)
 
 A beautiful, fully-featured **Hostel & Mess Management System** designed to effortlessly track meals, expenses, and members with a smart, modern UI.
 
