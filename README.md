@@ -1,95 +1,261 @@
-# 🍽️ House Ledger
+# House Ledger
 
-![Banner Image](./frontend/public/logo.png)
+<p align="center">
+  <img src="./frontend/public/logo.png" alt="House Ledger logo" width="110" />
+</p>
 
-A beautiful, fully-featured **Hostel & Mess Management System** designed to effortlessly track meals, expenses, and members with a smart, modern UI.
+<p align="center">
+  Smart mess and hostel expense tracking for meals, rent, shared bills, payments, and settlements.
+</p>
 
-Built with the MERN stack (MongoDB, Express, React, Node.js) and perfectly optimized for cloud deployment.
-
----
-
-## ✨ Features
-
-- **Dashboard:** Smart summaries of total expenses, active meals, and unpaid dues.
-- **Meal Tracking:** Daily meal logging for every member.
-- **Expense Ledger:** Transparent tracking of shared bills (groceries, utilities, etc.).
-- **Member Management:** Add, remove, and manage mess members.
-- **Billing & Payments:** Generate automated monthly summaries and mark payments as paid.
-- **Modern UI:** Built with React & Tailwind CSS for a fully responsive, glassy, and premium feel.
+<p align="center">
+  <img src="https://img.shields.io/badge/MERN-Full%20Stack-0f766e?style=for-the-badge" alt="MERN Stack" />
+  <img src="https://img.shields.io/badge/React-19-1d4ed8?style=for-the-badge" alt="React 19" />
+  <img src="https://img.shields.io/badge/Express-API-111827?style=for-the-badge" alt="Express API" />
+  <img src="https://img.shields.io/badge/MongoDB-Database-166534?style=for-the-badge" alt="MongoDB" />
+</p>
 
 ---
 
-## 🛠️ Tech Stack
+## Overview
 
-**Frontend:**
-- React 19 + Vite
-- Tailwind CSS v4
-- Axios
-- React Router DOM v7
+House Ledger helps a mess manager and members stay aligned on monthly costs. It combines meal logging, rent management, bill splitting, payment tracking, and member-to-member settlements into one workflow.
 
-**Backend:**
-- Node.js & Express
-- MongoDB & Mongoose
-- JSON Web Tokens (JWT) for Authentication
-- Zod for Validation
+### Quick Navigation
 
----
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [User Guide](#user-guide)
+- [FAQ](#faq)
+- [Deployment](#deployment)
 
-## 🚀 Quick Start (Local Development)
+## Features
+
+| Area | What it does |
+| --- | --- |
+| Authentication | Register and log in with JWT-based auth |
+| Mess Access | Create a new mess or join with an invite code |
+| Manager Tools | Set meal price, add bills, update rents, manage payment status |
+| Member Tools | Log meals, check dues, mark self as paid, repay settlements |
+| Monthly Summary | Breaks down rent, bills, meals, and adjusted dues |
+| Settlements | Track who owes whom and allow partial repayments |
+
+## Tech Stack
+
+| Layer | Tools |
+| --- | --- |
+| Frontend | React 19, Vite, Tailwind CSS v4, Axios, React Router DOM v7 |
+| Backend | Node.js, Express, MongoDB, Mongoose, JWT, Zod |
+
+## Quick Start
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/nasifsafwan/House-Ledger.git
 cd House-Ledger
 ```
 
-### 2. Backend Setup
+### 2. Install dependencies
+
 ```bash
 cd backend
 npm install
 ```
-Create a `.env` file in the `backend` directory (refer to `.env.example`):
+
+```bash
+cd ../frontend
+npm install
+```
+
+### 3. Configure environment variables
+
+Create `backend/.env`:
+
 ```env
 PORT=8080
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_key
 CORS_ORIGIN=http://localhost:5173
 ```
-Start the backend server:
+
+Optional frontend override in `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:8080/api
+```
+
+> If `VITE_API_URL` is not set, the frontend uses `http://localhost:8080/api` in development.
+
+### 4. Run the app
+
+Backend:
+
 ```bash
+cd backend
 npm run dev
 ```
 
-### 3. Frontend Setup
+Frontend:
+
 ```bash
-# In a new terminal, from the project root:
 cd frontend
-npm install
 npm run dev
 ```
-The app will be running at `http://localhost:5173`.
 
----
+Open `http://localhost:5173`.
 
-## ☁️ Deployment (Vercel)
+## User Guide
 
-This project is configured as a Monorepo capable of deploying beautifully to **Vercel** with a single click.
+### Main Flow
 
-1. Import the repository into your Vercel dashboard.
-2. Vercel will automatically detect the build settings via `vercel.json` and the root `package.json`.
-3. Add your Environment Variables in the Vercel Dashboard:
-   - `MONGO_URI`
-   - `JWT_SECRET`
-   - `VITE_API_URL` (Set this to `/api` for same-domain deployment)
-4. Deploy! The frontend will be built statically and the backend will run efficiently as a Serverless Function.
+```text
+Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
+```
 
----
+### First-Time Setup
 
-## 🤝 Contributing
+1. Create an account.
+2. Sign in.
+3. Create a new mess as manager, or join one using an invite code.
+4. Open the mess from the mess selection screen.
 
-Contributions, issues, and feature requests are welcome!
-Feel free to check [issues page](https://github.com/nasifsafwan/House-Ledger/issues).
+### Role Guide
 
----
+| Role | Main actions |
+| --- | --- |
+| Manager | Set monthly costs, update member rent, mark payments, manage settlements |
+| Member | Log meals, review dues, mark self as paid, repay settlements |
 
-<p align="center">Made with ❤️ for easier living.</p>
+### Manager Workflow
+
+<details>
+  <summary><strong>Open manager checklist</strong></summary>
+
+1. Select the month from the dashboard.
+2. Enter the meal unit price in `Quick Settings`.
+3. Add utility and other bill items.
+4. Review the bill breakdown and collection summary.
+5. Update each member's rent for the selected month.
+6. Monitor who has paid and mark payment status.
+7. Create settlements when one member owes another.
+8. Record repayment entries or force-settle if needed.
+
+</details>
+
+### Member Workflow
+
+<details>
+  <summary><strong>Open member checklist</strong></summary>
+
+1. Open the current month.
+2. Log meals from `Quick Meal Log`.
+3. Review rent, bill share, meal cost, and adjusted due.
+4. Mark yourself as paid after sending payment.
+5. Repay open settlements if you owe another member.
+
+</details>
+
+### Mess Access at a Glance
+
+| Action | Result |
+| --- | --- |
+| Create mess | You become the manager and get an invite code |
+| Join with invite code | You become a member of that mess |
+| Open mess card | You are routed to manager or member dashboard based on your role |
+
+## FAQ
+
+<details>
+  <summary><strong>What is the difference between a manager and a member?</strong></summary>
+
+Managers can configure monthly costs, update rents, manage payment status, and control settlements. Members can log meals, view their own monthly summary, mark themselves as paid, and repay settlements they owe.
+
+</details>
+
+<details>
+  <summary><strong>How is the monthly due calculated?</strong></summary>
+
+The total is based on:
+
+- Rent
+- Equal share of total monthly bills across active members
+- Meal cost from `meal count x unit price`
+- Settlement adjustments
+
+The app also shows an adjusted total when settlements change the final payable amount.
+
+</details>
+
+<details>
+  <summary><strong>Can a member join more than one mess?</strong></summary>
+
+Yes. The mess selection page lists all active mess memberships for the signed-in user.
+
+</details>
+
+<details>
+  <summary><strong>What happens if someone rejoins a mess they left before?</strong></summary>
+
+The backend reactivates a previous inactive membership when that user joins the same mess again with a valid invite code.
+
+</details>
+
+<details>
+  <summary><strong>Can members mark other members as paid?</strong></summary>
+
+No. Members can mark only themselves as paid. Managers can mark any member as paid or unpaid.
+
+</details>
+
+<details>
+  <summary><strong>Who can create and repay settlements?</strong></summary>
+
+Any active member can create a settlement in a mess. Repayments can be recorded by the owing member or by the manager.
+
+</details>
+
+<details>
+  <summary><strong>Can a settlement be partially repaid?</strong></summary>
+
+Yes. Partial repayments are supported until the remaining amount reaches zero.
+
+</details>
+
+<details>
+  <summary><strong>Why is the frontend failing to connect to the backend?</strong></summary>
+
+Check these first:
+
+- The backend server is running on port `8080`
+- `MONGO_URI` and `JWT_SECRET` are set in `backend/.env`
+- `CORS_ORIGIN` includes `http://localhost:5173`
+- `VITE_API_URL` points to the correct backend API URL if you overrode it
+
+</details>
+
+<details>
+  <summary><strong>Is there a <code>.env.example</code> file?</strong></summary>
+
+No. This repository currently does not include one, so use the environment variable block in this README.
+
+</details>
+
+## Deployment
+
+This repo is structured for the same-project frontend and API deployment.
+
+### Required environment variables
+
+- `MONGO_URI`
+- `JWT_SECRET`
+- `VITE_API_URL=/api`
+
+### Optional
+
+- `RESEND_API_KEY`
+
+## Contributing
+
+Issues and pull requests are welcome.
