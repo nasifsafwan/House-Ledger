@@ -18,16 +18,19 @@ const configuredOrigins = (process.env.CORS_ORIGIN || "")
 app.use(
   cors({
     origin(origin, cb) {
-      // Allow non-browser and same-origin requests.
+      // Allow non-browser and same-origin requests (origin is undefined).
       if (!origin) return cb(null, true);
 
-      // In development, allow localhost ports to avoid frequent CORS mismatches.
+      // In development, allow any localhost port.
       if (process.env.NODE_ENV !== "production" && /^http:\/\/localhost:\d+$/.test(origin)) {
         return cb(null, true);
       }
 
       if (configuredOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error("CORS origin not allowed"));
+
+      // Don't error — just skip CORS headers. Same-origin requests still
+      // succeed because the browser only enforces CORS on cross-origin calls.
+      return cb(null, false);
     },
     credentials: true
   })
