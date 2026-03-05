@@ -1,4 +1,4 @@
-# 🍽️ Mess Manager
+# 🍽️ House Ledger
 
 ![Banner Image](./frontend/public/logo.png)
 
