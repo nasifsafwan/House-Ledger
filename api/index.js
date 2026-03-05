@@ -15,6 +15,15 @@ async function ensureDB() {
 }
 
 export default async function handler(req, res) {
-    await ensureDB();
-    return app(req, res);
+    try {
+        await ensureDB();
+        return app(req, res);
+    } catch (error) {
+        console.error("Vercel Function Error:", error);
+        return res.status(500).json({
+            error: "Internal Server Error",
+            message: error.message,
+            stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+        });
+    }
 }
