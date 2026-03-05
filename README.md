@@ -16,7 +16,7 @@
 </p>
 
 ---
-This project has been hosted in : https://house-ledger-lgkkz01pl-nasifsafwans-projects.vercel.app/
+This project is available in: https://house-ledger-lgkkz01pl-nasifsafwans-projects.vercel.app/ and is open source.
 ## Overview
 
 House Ledger helps a mess manager and members stay aligned on monthly costs. It combines meal logging, rent management, bill splitting, payment tracking, and member-to-member settlements into one workflow.
