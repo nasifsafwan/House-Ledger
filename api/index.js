@@ -898,16 +898,15 @@ app.use(errorHandler);
 var app_default = app;
 
 // api/index.js
-var isConnected = false;
 async function ensureDB() {
-  if (!isConnected) {
-    const uri = process.env.MONGO_URI;
-    if (!uri) {
-      throw new Error("Missing MONGO_URI environment variable");
-    }
-    await connectDB(uri);
-    isConnected = true;
+  if (mongoose.connection.readyState >= 1) {
+    return;
   }
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    throw new Error("Missing MONGO_URI environment variable");
+  }
+  await connectDB(uri);
 }
 async function handler(req, res) {
   try {
