@@ -9,6 +9,15 @@ export default function SelectMess() {
   const [memberships, setMemberships] = useState([]);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
+  const [copiedCode, setCopiedCode] = useState(null);
+
+  const handleCopy = (e, code) => {
+    e.stopPropagation();
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
 
   useEffect(() => {
     (async () => {
@@ -70,13 +79,26 @@ export default function SelectMess() {
                   <div className="font-semibold text-slate-900">{m.messId?.name}</div>
                   <div className="mt-0.5 flex items-center gap-2 text-sm text-slate-500">
                     <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${m.role === "MANAGER"
-                        ? "bg-warn-50 text-warn-600"
-                        : "bg-brand-50 text-brand-600"
+                      ? "bg-warn-50 text-warn-600"
+                      : "bg-brand-50 text-brand-600"
                       }`}>
                       {m.role}
                     </span>
                     <span className="text-slate-300">•</span>
-                    <span className="font-mono text-xs">{m.messId?.inviteCode}</span>
+                    <div
+                      className="flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-0.5 border border-slate-100 transition-colors hover:border-slate-300 hover:bg-slate-100 cursor-pointer"
+                      onClick={(e) => handleCopy(e, m.messId?.inviteCode)}
+                      title="Copy invite code"
+                    >
+                      <span className="font-mono text-xs text-slate-600 tracking-wide">{m.messId?.inviteCode}</span>
+                      <div className="text-slate-400 flex items-center justify-center transition-colors">
+                        {copiedCode === m.messId?.inviteCode ? (
+                          <span className="text-emerald-500 font-bold" style={{ fontSize: '10px' }}>✓</span>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

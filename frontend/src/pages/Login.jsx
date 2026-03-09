@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthAPI } from "../api/auth";
 import { authStore } from "../store/authStore";
@@ -10,6 +10,12 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [err, setErr] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (authStore.getToken()) {
+            nav("/");
+        }
+    }, [nav]);
 
     const submit = async (e) => {
         e.preventDefault();

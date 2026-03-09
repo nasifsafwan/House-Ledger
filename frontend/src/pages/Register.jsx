@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthAPI } from "../api/auth";
+import { authStore } from "../store/authStore";
 import Layout from "../components/Layout";
 
 export default function Register() {
@@ -10,6 +11,12 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [err, setErr] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (authStore.getToken()) {
+            nav("/");
+        }
+    }, [nav]);
 
     const submit = async (e) => {
         e.preventDefault();

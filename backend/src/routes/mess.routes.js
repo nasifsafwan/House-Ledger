@@ -528,8 +528,6 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
   const rows = [];
   let totalExpected = 0;
   let totalCollected = 0;
-  let totalAdjustedExpected = 0;
-  let totalAdjustedCollected = 0;
 
   for (const mem of members) {
     const uid = String(mem.userId._id);
@@ -545,9 +543,7 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
     const status = pay ? pay.status : "UNPAID";
 
     totalExpected += totalDue;
-    totalAdjustedExpected += adjustedDue;
     if (status === "PAID") totalCollected += totalDue;
-    if (status === "PAID") totalAdjustedCollected += adjustedDue;
 
     rows.push({
       user: { id: uid, name: mem.userId.name, email: mem.userId.email },
@@ -556,8 +552,6 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
       mealCost: round2(mealCost),
       billShare: round2(share),
       totalDue: round2(totalDue),
-      settlements,
-      adjustedDue: round2(adjustedDue),
       paymentStatus: status
     });
   }
@@ -567,12 +561,9 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
     unitPrice: round2(unitPrice),
     bills: { totalBills: round2(totalBills), activeMembers, share: round2(share) },
     members: rows,
-    totals: {
-      expected: round2(totalExpected),
-      collected: round2(totalCollected),
-      adjustedExpected: round2(totalAdjustedExpected),
-      adjustedCollected: round2(totalAdjustedCollected)
-    }
+    totals: { expected: round2(totalExpected), collected: round2(totalCollected) },
+    settlements,
+    adjustedDue: round2(totalExpected + settlements.owed - settlements.receivable)
   });
 }));
 
