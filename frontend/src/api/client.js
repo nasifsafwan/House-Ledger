@@ -1,8 +1,10 @@
 import axios from "axios";
 import { authStore } from "../store/authStore";
 
+const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+  baseURL: import.meta.env.VITE_API_URL || (isLocalhost ? "http://localhost:8080/api" : "/api")
 });
 
 api.interceptors.request.use((config) => {
