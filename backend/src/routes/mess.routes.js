@@ -138,8 +138,8 @@ router.get("/:messId/settlements", auth, requireMember(), async (req, res) => {
   }
 
   const docs = await Settlement.find(filter)
-    .populate("fromUserId", "name email")
-    .populate("toUserId", "name email")
+    .populate("fromUserId", "name username")
+    .populate("toUserId", "name username")
     .sort({ createdAt: -1 });
 
   res.json({ settlements: docs });
@@ -197,8 +197,8 @@ router.post("/:messId/settlements/:settlementId/pay", auth, requireMember(), asy
   await s.save();
 
   const populated = await Settlement.findById(s._id)
-    .populate("fromUserId", "name email")
-    .populate("toUserId", "name email");
+    .populate("fromUserId", "name username")
+    .populate("toUserId", "name username");
 
   res.json({ settlement: populated });
 });
@@ -380,8 +380,8 @@ router.post("/:messId/visitors", auth, requireMember(), asyncHandler(async (req,
 
 router.get("/:messId/visitors", auth, requireManager(), asyncHandler(async (req, res) => {
   const docs = await Visitor.find({ messId: req.params.messId })
-    .populate("visitedUserId", "name email")
-    .populate("createdBy", "name email")
+    .populate("visitedUserId", "name username")
+    .populate("createdBy", "name username")
     .sort({ entryTime: -1 });
 
   res.json({ visitors: docs });
@@ -517,7 +517,7 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
 
   const messId = req.params.messId;
 
-  const members = await Membership.find({ messId, isActive: true }).populate("userId", "name email");
+  const members = await Membership.find({ messId, isActive: true }).populate("userId", "name username");
 
   const unitPrice = await getMealUnitPrice({ messId, monthKey });
   const { totalBills, activeMembers, share } = await getBillShare({ messId, monthKey });
@@ -546,7 +546,7 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
     if (status === "PAID") totalCollected += totalDue;
 
     rows.push({
-      user: { id: uid, name: mem.userId.name, email: mem.userId.email },
+      user: { id: uid, name: mem.userId.name, username: mem.userId.username },
       rent: round2(rent),
       mealCount,
       mealCost: round2(mealCost),
@@ -561,9 +561,7 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
     unitPrice: round2(unitPrice),
     bills: { totalBills: round2(totalBills), activeMembers, share: round2(share) },
     members: rows,
-    totals: { expected: round2(totalExpected), collected: round2(totalCollected) },
-    settlements,
-    adjustedDue: round2(totalExpected + settlements.owed - settlements.receivable)
+    totals: { expected: round2(totalExpected), collected: round2(totalCollected) }
   });
 }));
 

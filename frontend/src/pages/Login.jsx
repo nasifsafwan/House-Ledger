@@ -6,7 +6,7 @@ import Layout from "../components/Layout";
 
 export default function Login() {
     const nav = useNavigate();
-    const [email, setEmail] = useState("");
+    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [err, setErr] = useState("");
     const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function Login() {
         setErr("");
         setLoading(true);
         try {
-            const res = await AuthAPI.login({ email, password });
+            const res = await AuthAPI.login({ identifier, password });
             authStore.set({ token: res.data.token, user: res.data.user });
             nav("/");
         } catch (e) {
@@ -57,13 +57,13 @@ export default function Login() {
 
                         <form onSubmit={submit} className="space-y-5">
                             <div>
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Username or Email</label>
                                 <input
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:bg-white"
-                                    type="email"
-                                    placeholder="you@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    type="text"
+                                    placeholder="johndoe or john@example.com"
+                                    value={identifier}
+                                    onChange={(e) => setIdentifier(e.target.value)}
                                     required
                                 />
                             </div>

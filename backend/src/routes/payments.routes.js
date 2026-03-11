@@ -21,8 +21,8 @@ router.get("/:messId", auth, requireMember(), asyncHandler(async (req, res) => {
 
   if (req.membership.role === "MANAGER") {
     const payments = await Payment.find({ messId, monthKey })
-      .populate("userId", "name email")
-      .populate("markedBy", "name email")
+      .populate("userId", "name username")
+      .populate("markedBy", "name username")
       .sort({ createdAt: -1 });
     return res.json({ payments });
   }

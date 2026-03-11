@@ -7,6 +7,7 @@ import Layout from "../components/Layout";
 export default function Register() {
     const nav = useNavigate();
     const [name, setName] = useState("");
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [err, setErr] = useState("");
@@ -23,7 +24,7 @@ export default function Register() {
         setErr("");
         setLoading(true);
         try {
-            await AuthAPI.register({ name, email, password });
+            await AuthAPI.register({ name, username, email, password });
             nav("/login");
         } catch (e) {
             setErr(
@@ -68,11 +69,22 @@ export default function Register() {
                                 />
                             </div>
                             <div>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Username</label>
+                                <input
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:bg-white"
+                                    type="text"
+                                    placeholder="johndoe"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
                                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
                                 <input
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:bg-white"
                                     type="email"
-                                    placeholder="you@example.com"
+                                    placeholder="john@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required

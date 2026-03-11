@@ -5,6 +5,8 @@ import authRoutes from "./routes/auth.routes.js";
 import messRoutes from "./routes/mess.routes.js";
 import membersRoutes from "./routes/members.routes.js";
 import paymentsRoutes from "./routes/payments.routes.js";
+import personalRoutes from "./routes/personal.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 
 import { notFound, errorHandler } from "./middleware/error.js";
 
@@ -43,6 +45,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/mess", messRoutes);      // mess + meals + bills + visitors + reminder + summary
 app.use("/api/members", membersRoutes); // member management
 app.use("/api/payments", paymentsRoutes);
+app.use("/api/personal", personalRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

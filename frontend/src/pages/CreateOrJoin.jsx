@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
@@ -10,22 +10,14 @@ export default function CreateOrJoin() {
   const [joinCode, setJoinCode] = useState("");
   const [err, setErr] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await MessAPI.myMesses();
-        if ((res.data.memberships || []).length > 0) nav("/select-mess");
-      } catch {
-      }
-    })();
-  }, [nav]);
+
 
   const createMess = async (e) => {
     e.preventDefault();
     setErr("");
     try {
       const res = await MessAPI.create(createForm);
-      nav(`/select-mess?new=${res.data.mess._id}`);
+      nav(`/?new=${res.data.mess._id}`);
     } catch (e2) {
       setErr(e2?.response?.data?.message || "Create mess failed");
     }
@@ -36,7 +28,7 @@ export default function CreateOrJoin() {
     setErr("");
     try {
       await MessAPI.join({ inviteCode: joinCode });
-      nav("/select-mess");
+      nav("/");
     } catch (e2) {
       setErr(e2?.response?.data?.message || "Join failed");
     }

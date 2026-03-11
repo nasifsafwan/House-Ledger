@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
+import ExpenseAnalytics from "../components/ExpenseAnalytics";
 import { MessAPI } from "../api/mess";
 import { PaymentsAPI } from "../api/payments";
 import { currentMonthKey } from "../utils/monthKey";
@@ -94,6 +95,13 @@ export default function MemberDashboard() {
             value={monthKey}
             onChange={(e) => setMonthKey(e.target.value)}
           />
+          <button
+            onClick={load}
+            className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-200"
+            title="Refresh Data"
+          >
+            ↻ Refresh
+          </button>
         </div>
       </div>
 
@@ -228,6 +236,12 @@ export default function MemberDashboard() {
               ))}
             </div>
           )}
+        </Card>
+      </div>
+      {/* Expense Analytics */}
+      <div className="mt-6">
+        <Card icon="📊" title="Mess Analytics" subtitle={`Spending insights for this mess`}>
+          <ExpenseAnalytics type="mess" messId={messId} />
         </Card>
       </div>
     </Layout>

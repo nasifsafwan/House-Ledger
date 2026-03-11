@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
+import ExpenseAnalytics from "../components/ExpenseAnalytics";
 import { MessAPI } from "../api/mess";
 import { MembersAPI } from "../api/members";
 import { PaymentsAPI } from "../api/payments";
@@ -181,6 +182,13 @@ export default function ManagerDashboard() {
             value={monthKey}
             onChange={(e) => setMonthKey(e.target.value)}
           />
+          <button
+            onClick={load}
+            className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-200"
+            title="Refresh Data"
+          >
+            ↻ Refresh
+          </button>
         </div>
       </div>
 
@@ -217,13 +225,13 @@ export default function ManagerDashboard() {
               <DetailRow label="Bill share / member" value={summary.bills.share} />
               <DetailRow label="Meal unit price" value={summary.unitPrice} />
               <div className="border-t border-slate-100 pt-3">
-              <DetailRow label="Total expected" value={summary.totals.expected} bold />
-              <DetailRow label="Total collected" value={summary.totals.collected} highlight={summary.totals.collected >= summary.totals.expected ? "success" : "warn"} />
-              <DetailRow label="Adjusted expected" value={summary.totals.adjustedExpected ?? summary.totals.expected} bold />
-              <DetailRow label="Adjusted collected" value={summary.totals.adjustedCollected ?? summary.totals.collected} highlight={(summary.totals.adjustedCollected ?? summary.totals.collected) >= (summary.totals.adjustedExpected ?? summary.totals.expected) ? "success" : "warn"} />
+                <DetailRow label="Total expected" value={summary.totals.expected} bold />
+                <DetailRow label="Total collected" value={summary.totals.collected} highlight={summary.totals.collected >= summary.totals.expected ? "success" : "warn"} />
+                <DetailRow label="Adjusted expected" value={summary.totals.adjustedExpected ?? summary.totals.expected} bold />
+                <DetailRow label="Adjusted collected" value={summary.totals.adjustedCollected ?? summary.totals.collected} highlight={(summary.totals.adjustedCollected ?? summary.totals.collected) >= (summary.totals.adjustedExpected ?? summary.totals.expected) ? "success" : "warn"} />
+              </div>
             </div>
-          </div>
-        ) : (
+          ) : (
             <div className="py-4 text-center text-sm text-slate-400">Loading…</div>
           )}
         </Card>
@@ -250,14 +258,14 @@ export default function ManagerDashboard() {
                       </div>
                       <div>
                         <div className="font-semibold text-slate-900">{r.user.name}</div>
-                        <div className="text-xs text-slate-400">{r.user.email}</div>
+                        <div className="text-xs text-slate-400">{r.user.username}</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold ${isPaid
-                          ? "bg-success-50 text-success-600"
-                          : "bg-danger-50 text-danger-600"
+                        ? "bg-success-50 text-success-600"
+                        : "bg-danger-50 text-danger-600"
                         }`}>
                         {isPaid ? "✅ PAID" : "⏳ UNPAID"}
                       </span>
@@ -293,18 +301,18 @@ export default function ManagerDashboard() {
                       <div className="text-slate-400">Bills</div>
                       <div className="mt-0.5 font-semibold text-slate-700">{r.billShare}৳</div>
                     </div>
-                      <div className="text-center">
-                        <div className="text-slate-400">Due</div>
-                        <div className={`mt-0.5 font-bold ${isPaid ? "text-success-600" : "text-danger-600"}`}>
-                          {displayDue}৳
-                        </div>
+                    <div className="text-center">
+                      <div className="text-slate-400">Due</div>
+                      <div className={`mt-0.5 font-bold ${isPaid ? "text-success-600" : "text-danger-600"}`}>
+                        {displayDue}৳
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-slate-500">
-                      Settlement adj: +{r.settlements?.owed ?? 0}৳ / -{r.settlements?.receivable ?? 0}৳
-                      {" • "}
-                      Adjusted due: <b>{isPaid ? 0 : (r.adjustedDue ?? r.totalDue)}৳</b>
-                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-slate-500">
+                    Settlement adj: +{r.settlements?.owed ?? 0}৳ / -{r.settlements?.receivable ?? 0}৳
+                    {" • "}
+                    Adjusted due: <b>{isPaid ? 0 : (r.adjustedDue ?? r.totalDue)}৳</b>
+                  </div>
 
                   {/* Rent editor */}
                   <div className="mt-3 flex items-center gap-2">
@@ -442,6 +450,13 @@ export default function ManagerDashboard() {
               })
             )}
           </div>
+        </Card>
+      </div>
+
+      {/* Expense Analytics */}
+      <div className="mt-6">
+        <Card icon="📊" title="Mess Analytics" subtitle={`Spending insights for this mess`}>
+          <ExpenseAnalytics type="mess" messId={messId} />
         </Card>
       </div>
     </Layout>

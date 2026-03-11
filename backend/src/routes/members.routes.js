@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get("/:messId", auth, requireManager(), asyncHandler(async (req, res) => {
   const members = await Membership.find({ messId: req.params.messId, isActive: true })
-    .populate("userId", "name email")
+    .populate("userId", "name username")
     .sort({ createdAt: 1 });
 
   res.json({ members });
