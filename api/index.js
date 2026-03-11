@@ -24,6 +24,13 @@ var userSchema = new mongoose2.Schema({
     required: true,
     trim: true
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
   email: {
     type: String,
     required: true,
@@ -50,6 +57,7 @@ var router = express.Router();
 router.post("/register", asyncHandler(async (req, res) => {
   const schema = z.object({
     name: z.string().min(1),
+    username: z.string().min(3),
     email: z.string().email(),
     password: z.string().min(6)
   });
@@ -57,33 +65,45 @@ router.post("/register", asyncHandler(async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ message: parsed.error.errors[0].message });
   }
-  const exists = await User_default.findOne({ email: parsed.data.email });
-  if (exists) {
+  const existingUsername = await User_default.findOne({ username: parsed.data.username });
+  if (existingUsername) {
+    return res.status(400).json({ message: "Username already in use" });
+  }
+  const existingEmail = await User_default.findOne({ email: parsed.data.email });
+  if (existingEmail) {
     return res.status(400).json({ message: "Email already in use" });
   }
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
-  await User_default.create({ name: parsed.data.name, email: parsed.data.email, passwordHash });
+  await User_default.create({
+    name: parsed.data.name,
+    username: parsed.data.username,
+    email: parsed.data.email,
+    passwordHash
+  });
   res.json({ message: "User registered successfully" });
 }));
 router.post("/login", asyncHandler(async (req, res) => {
   const schema = z.object({
-    email: z.string().email(),
+    identifier: z.string().min(1),
     password: z.string().min(6)
   });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ message: parsed.error.errors[0].message });
   }
-  const user = await User_default.findOne({ email: parsed.data.email });
+  const identifier = parsed.data.identifier.toLowerCase().trim();
+  const user = await User_default.findOne({
+    $or: [{ username: identifier }, { email: identifier }]
+  });
   if (!user) {
-    return res.status(400).json({ message: "Invalid email or password" });
+    return res.status(400).json({ message: "Invalid credentials" });
   }
   const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
   if (!ok) {
-    return res.status(400).json({ message: "Invalid email or password" });
+    return res.status(400).json({ message: "Invalid credentials" });
   }
-  const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-  return res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+  const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return res.json({ token, user: { id: user._id, name: user.name, username: user.username } });
 }));
 var auth_routes_default = router;
 
@@ -99,7 +119,7 @@ function auth(req, res, next) {
   if (!token) return res.status(401).json({ message: "Missing token" });
   try {
     const payload = jwt2.verify(token, process.env.JWT_SECRET);
-    req.user = { id: payload.id, email: payload.email };
+    req.user = { id: payload.id, username: payload.username };
     next();
   } catch {
     return res.status(401).json({ message: "Invalid token" });
@@ -222,7 +242,6 @@ import mongoose6 from "mongoose";
 var MealPriceSchema = new mongoose6.Schema({
   messId: { type: mongoose6.Schema.Types.ObjectId, ref: "Mess", required: true },
   monthKey: { type: String, required: true },
-  // e.g. "2024-06"
   unitPrice: { type: Number, required: true, min: 0 }
 }, { timestamps: true });
 MealPriceSchema.index({ messId: 1, monthKey: 1 }, { unique: true });
@@ -270,7 +289,6 @@ import mongoose9 from "mongoose";
 var ReminderSettingSchema = new mongoose9.Schema({
   messId: { type: mongoose9.Schema.Types.ObjectId, ref: "Mess", required: true },
   dayOfMonth: { type: Number, required: true },
-  // e.g. 25
   enabled: { type: Boolean, default: true }
 }, { timestamps: true });
 ReminderSettingSchema.index({ messId: 1 }, { unique: true });
@@ -282,7 +300,6 @@ var RentSettingSchema = new mongoose10.Schema({
   messId: { type: mongoose10.Schema.Types.ObjectId, ref: "Mess", required: true },
   userId: { type: mongoose10.Schema.Types.ObjectId, ref: "User", required: true },
   monthKey: { type: String, required: true },
-  // e.g. "2024-06"
   rent: { type: Number, required: true }
 }, { timestamps: true });
 RentSettingSchema.index({ messId: 1, userId: 1, monthKey: 1 }, { unique: true });
@@ -327,6 +344,41 @@ var SettlementSchema = new mongoose12.Schema({
 });
 var Settlement_default = mongoose12.model("Settlement", SettlementSchema);
 
+// backend/src/models/PersonalExpense.js
+import mongoose13 from "mongoose";
+var PersonalExpenseSchema = new mongoose13.Schema(
+  {
+    userId: {
+      type: mongoose13.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0.01
+    },
+    description: {
+      type: String,
+      default: "",
+      trim: true
+    },
+    date: {
+      type: Date,
+      required: true,
+      default: Date.now
+    }
+  },
+  { timestamps: true }
+);
+PersonalExpenseSchema.index({ userId: 1, date: -1 });
+var PersonalExpense_default = mongoose13.model("PersonalExpense", PersonalExpenseSchema);
+
 // backend/src/utils/inviteCode.js
 function generateInviteCode(len = 8) {
   const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -344,7 +396,7 @@ function round2(x) {
 }
 
 // backend/src/utils/monthKey.js
-function toMonthKey(date = /* @__PURE__ */ new Date()) {
+function toMonthKey(date = new Date()) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}`;
@@ -446,7 +498,7 @@ router2.get("/:messId/settlements", auth, requireMember(), async (req, res) => {
   if (req.membership.role !== "MANAGER") {
     filter.$or = [{ fromUserId: req.user.id }, { toUserId: req.user.id }];
   }
-  const docs = await Settlement_default.find(filter).populate("fromUserId", "name email").populate("toUserId", "name email").sort({ createdAt: -1 });
+  const docs = await Settlement_default.find(filter).populate("fromUserId", "name username").populate("toUserId", "name username").sort({ createdAt: -1 });
   res.json({ settlements: docs });
 });
 router2.post("/:messId/settlements/:settlementId/pay", auth, requireMember(), async (req, res) => {
@@ -477,7 +529,7 @@ router2.post("/:messId/settlements/:settlementId/pay", auth, requireMember(), as
   s.payments.push({
     amount,
     paidBy: req.user.id,
-    paidAt: /* @__PURE__ */ new Date(),
+    paidAt: new Date(),
     note: note || ""
   });
   s.remainingAmount = Number((s.remainingAmount - amount).toFixed(2));
@@ -488,7 +540,7 @@ router2.post("/:messId/settlements/:settlementId/pay", auth, requireMember(), as
     s.status = "PARTIAL";
   }
   await s.save();
-  const populated = await Settlement_default.findById(s._id).populate("fromUserId", "name email").populate("toUserId", "name email");
+  const populated = await Settlement_default.findById(s._id).populate("fromUserId", "name username").populate("toUserId", "name username");
   res.json({ settlement: populated });
 });
 router2.patch("/:messId/settlements/:settlementId/settle", auth, requireManager(), async (req, res) => {
@@ -504,9 +556,7 @@ router2.patch("/:messId/settlements/:settlementId/settle", auth, requireManager(
   res.json({ message: "Settlement marked settled" });
 });
 router2.get("/me", auth, asyncHandler(async (req, res) => {
-  const memberships = await Membership_default.find({ userId: req.user.id, isActive: true }).populate(
-    "messId"
-  );
+  const memberships = await Membership_default.find({ userId: req.user.id, isActive: true }).populate("messId");
   res.json({ memberships });
 }));
 router2.post("/:messId/meals", auth, requireMember(), asyncHandler(async (req, res) => {
@@ -591,7 +641,6 @@ router2.post("/:messId/visitors", auth, requireMember(), asyncHandler(async (req
     visitorName: z2.string().min(1),
     visitedUserId: z2.string().min(1),
     entryTime: z2.string().min(1)
-    // ISO string
   });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: parsed.error.issues });
@@ -611,7 +660,7 @@ router2.post("/:messId/visitors", auth, requireMember(), asyncHandler(async (req
   res.json({ visitor: doc });
 }));
 router2.get("/:messId/visitors", auth, requireManager(), asyncHandler(async (req, res) => {
-  const docs = await Visitor_default.find({ messId: req.params.messId }).populate("visitedUserId", "name email").populate("createdBy", "name email").sort({ entryTime: -1 });
+  const docs = await Visitor_default.find({ messId: req.params.messId }).populate("visitedUserId", "name username").populate("createdBy", "name username").sort({ entryTime: -1 });
   res.json({ visitors: docs });
 }));
 router2.put("/:messId/reminder", auth, requireManager(), asyncHandler(async (req, res) => {
@@ -704,7 +753,7 @@ router2.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asy
   const monthKey = req.query.monthKey;
   if (!monthKey) return res.status(400).json({ message: "monthKey is required" });
   const messId = req.params.messId;
-  const members = await Membership_default.find({ messId, isActive: true }).populate("userId", "name email");
+  const members = await Membership_default.find({ messId, isActive: true }).populate("userId", "name username");
   const unitPrice = await getMealUnitPrice({ messId, monthKey });
   const { totalBills, activeMembers, share } = await getBillShare({ messId, monthKey });
   const payments = await Payment_default.find({ messId, monthKey });
@@ -712,31 +761,23 @@ router2.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asy
   const rows = [];
   let totalExpected = 0;
   let totalCollected = 0;
-  let totalAdjustedExpected = 0;
-  let totalAdjustedCollected = 0;
   for (const mem of members) {
     const uid = String(mem.userId._id);
     const rent = await getRentForMonth({ messId, userId: uid, monthKey });
     const mealCount = await getMealCount({ messId, userId: uid, monthKey });
     const mealCost = mealCount * unitPrice;
     const totalDue = rent + share + mealCost;
-    const settlements = await getSettlementBalances({ messId, userId: uid, monthKey });
-    const adjustedDue = totalDue + settlements.owed - settlements.receivable;
     const pay = paymentMap.get(uid);
     const status = pay ? pay.status : "UNPAID";
     totalExpected += totalDue;
-    totalAdjustedExpected += adjustedDue;
     if (status === "PAID") totalCollected += totalDue;
-    if (status === "PAID") totalAdjustedCollected += adjustedDue;
     rows.push({
-      user: { id: uid, name: mem.userId.name, email: mem.userId.email },
+      user: { id: uid, name: mem.userId.name, username: mem.userId.username },
       rent: round2(rent),
       mealCount,
       mealCost: round2(mealCost),
       billShare: round2(share),
       totalDue: round2(totalDue),
-      settlements,
-      adjustedDue: round2(adjustedDue),
       paymentStatus: status
     });
   }
@@ -745,12 +786,7 @@ router2.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asy
     unitPrice: round2(unitPrice),
     bills: { totalBills: round2(totalBills), activeMembers, share: round2(share) },
     members: rows,
-    totals: {
-      expected: round2(totalExpected),
-      collected: round2(totalCollected),
-      adjustedExpected: round2(totalAdjustedExpected),
-      adjustedCollected: round2(totalAdjustedCollected)
-    }
+    totals: { expected: round2(totalExpected), collected: round2(totalCollected) }
   });
 }));
 var mess_routes_default = router2;
@@ -760,14 +796,13 @@ import express3 from "express";
 import { z as z3 } from "zod";
 var router3 = express3.Router();
 router3.get("/:messId", auth, requireManager(), asyncHandler(async (req, res) => {
-  const members = await Membership_default.find({ messId: req.params.messId, isActive: true }).populate("userId", "name email").sort({ createdAt: 1 });
+  const members = await Membership_default.find({ messId: req.params.messId, isActive: true }).populate("userId", "name username").sort({ createdAt: 1 });
   res.json({ members });
 }));
 router3.patch("/:messId/:memberId/rent", auth, requireManager(), asyncHandler(async (req, res) => {
   const schema = z3.object({
     rent: z3.number().min(0),
     effectiveMonthKey: z3.string().optional()
-    // default next month
   });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: parsed.error.issues });
@@ -778,7 +813,7 @@ router3.patch("/:messId/:memberId/rent", auth, requireManager(), asyncHandler(as
   if (!membership || String(membership.messId) !== String(messId) || !membership.isActive) {
     return res.status(404).json({ message: "Member not found" });
   }
-  const currentMK = toMonthKey(/* @__PURE__ */ new Date());
+  const currentMK = toMonthKey(new Date());
   const targetMK = effectiveMonthKey || nextMonthKey(currentMK);
   await RentSetting_default.findOneAndUpdate(
     { messId, userId: membership.userId, monthKey: targetMK },
@@ -818,7 +853,7 @@ router4.get("/:messId", auth, requireMember(), asyncHandler(async (req, res) => 
   const { messId } = req.params;
   const { monthKey } = parsed.data;
   if (req.membership.role === "MANAGER") {
-    const payments = await Payment_default.find({ messId, monthKey }).populate("userId", "name email").populate("markedBy", "name email").sort({ createdAt: -1 });
+    const payments = await Payment_default.find({ messId, monthKey }).populate("userId", "name username").populate("markedBy", "name username").sort({ createdAt: -1 });
     return res.json({ payments });
   }
   const payment = await Payment_default.findOne({ messId, monthKey, userId: req.user.id });
@@ -834,7 +869,7 @@ router4.post("/:messId/self-paid", auth, requireMember(), asyncHandler(async (re
   const { monthKey } = parsed.data;
   const payment = await Payment_default.findOneAndUpdate(
     { messId, monthKey, userId: req.user.id },
-    { status: "PAID", paidAt: /* @__PURE__ */ new Date(), markedBy: req.user.id },
+    { status: "PAID", paidAt: new Date(), markedBy: req.user.id },
     { upsert: true, new: true }
   );
   res.json({ payment });
@@ -851,7 +886,7 @@ router4.put("/:messId/:userId", auth, requireManager(), asyncHandler(async (req,
   const update = {
     status,
     markedBy: req.user.id,
-    paidAt: status === "PAID" ? /* @__PURE__ */ new Date() : null
+    paidAt: status === "PAID" ? new Date() : null
   };
   const payment = await Payment_default.findOneAndUpdate(
     { messId, monthKey, userId },
@@ -861,6 +896,186 @@ router4.put("/:messId/:userId", auth, requireManager(), asyncHandler(async (req,
   res.json({ payment });
 }));
 var payments_routes_default = router4;
+
+// backend/src/routes/personal.routes.js
+import express6 from "express";
+import { z as z5 } from "zod";
+var router5 = express6.Router();
+router5.post("/", auth, asyncHandler(async (req, res) => {
+  const schema = z5.object({
+    category: z5.string().min(1),
+    amount: z5.number().min(0.01),
+    description: z5.string().optional(),
+    date: z5.string().optional()
+  });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues });
+  const doc = await PersonalExpense_default.create({
+    userId: req.user.id,
+    category: parsed.data.category,
+    amount: parsed.data.amount,
+    description: parsed.data.description || "",
+    date: parsed.data.date ? new Date(parsed.data.date) : new Date()
+  });
+  res.json({ expense: doc });
+}));
+router5.get("/", auth, asyncHandler(async (req, res) => {
+  const filter = { userId: req.user.id };
+  if (req.query.startDate || req.query.endDate) {
+    filter.date = {};
+    if (req.query.startDate) filter.date.$gte = new Date(req.query.startDate);
+    if (req.query.endDate) filter.date.$lte = new Date(req.query.endDate);
+  }
+  const expenses = await PersonalExpense_default.find(filter).sort({ date: -1 });
+  res.json({ expenses });
+}));
+router5.delete("/:id", auth, asyncHandler(async (req, res) => {
+  const doc = await PersonalExpense_default.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.user.id
+  });
+  if (!doc) return res.status(404).json({ message: "Expense not found" });
+  res.json({ message: "Deleted" });
+}));
+var personal_routes_default = router5;
+
+// backend/src/routes/analytics.routes.js
+import express7 from "express";
+import mongoose14 from "mongoose";
+var router6 = express7.Router();
+router6.get("/personal", auth, asyncHandler(async (req, res) => {
+  const filter = { userId: new mongoose14.Types.ObjectId(req.user.id) };
+  if (req.query.startDate || req.query.endDate) {
+    filter.date = {};
+    if (req.query.startDate) filter.date.$gte = new Date(req.query.startDate);
+    if (req.query.endDate) filter.date.$lte = new Date(req.query.endDate);
+  }
+  const categoryAgg = await PersonalExpense_default.aggregate([
+    { $match: filter },
+    { $group: { _id: "$category", total: { $sum: "$amount" } } },
+    { $sort: { total: -1 } }
+  ]);
+  const monthlyAgg = await PersonalExpense_default.aggregate([
+    { $match: filter },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" }
+        },
+        total: { $sum: "$amount" }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } }
+  ]);
+  const categories = categoryAgg.map((c) => ({
+    category: c._id,
+    total: Math.round(c.total * 100) / 100
+  }));
+  const monthly = monthlyAgg.map((m) => ({
+    month: `${m._id.year}-${String(m._id.month).padStart(2, "0")}`,
+    total: Math.round(m.total * 100) / 100
+  }));
+  const grandTotal = categories.reduce((s, c) => s + c.total, 0);
+  res.json({ categories, monthly, grandTotal: Math.round(grandTotal * 100) / 100 });
+}));
+router6.get("/mess/:messId", auth, requireMember(), asyncHandler(async (req, res) => {
+  const { messId } = req.params;
+  const { startDate, endDate } = req.query;
+  let startMonthKey = null;
+  let endMonthKey = null;
+  if (startDate) {
+    const d = new Date(startDate);
+    startMonthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+  if (endDate) {
+    const d = new Date(endDate);
+    endMonthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+  const monthFilter = {};
+  if (startMonthKey || endMonthKey) {
+    monthFilter.monthKey = {};
+    if (startMonthKey) monthFilter.monthKey.$gte = startMonthKey;
+    if (endMonthKey) monthFilter.monthKey.$lte = endMonthKey;
+  }
+  const bills = await Bill_default.find({ messId, ...monthFilter });
+  let utilitiesTotal = 0;
+  const monthlyMap = new Map();
+  for (const bill of bills) {
+    utilitiesTotal += bill.totalAmount || 0;
+    const prev = monthlyMap.get(bill.monthKey) || 0;
+    monthlyMap.set(bill.monthKey, prev + (bill.totalAmount || 0));
+  }
+  const dateFilter = {};
+  if (startDate) dateFilter.$gte = startDate;
+  if (endDate) dateFilter.$lte = endDate;
+  const mealLogFilter = { messId };
+  if (startDate || endDate) mealLogFilter.date = dateFilter;
+  const mealLogs = await MealLog_default.find(mealLogFilter);
+  const mealPrices = await MealPrice_default.find({ messId, ...monthFilter });
+  const priceMap = new Map(mealPrices.map((mp) => [mp.monthKey, mp.unitPrice]));
+  let foodTotal = 0;
+  for (const log of mealLogs) {
+    const mk = log.date.slice(0, 7);
+    const price = priceMap.get(mk) || 0;
+    const cost = (log.mealsCount || 0) * price;
+    foodTotal += cost;
+    const prev = monthlyMap.get(mk) || 0;
+    monthlyMap.set(mk, prev + cost);
+  }
+  const activeMembers = await Membership_default.find({ messId, isActive: true });
+  let rentTotal = 0;
+  const allMonthKeys = new Set([...monthlyMap.keys()]);
+  for (const bill of bills) allMonthKeys.add(bill.monthKey);
+  if (startMonthKey && endMonthKey) {
+    let [sy, sm] = startMonthKey.split("-").map(Number);
+    const [ey, em] = endMonthKey.split("-").map(Number);
+    while (sy < ey || (sy === ey && sm <= em)) {
+      allMonthKeys.add(`${sy}-${String(sm).padStart(2, "0")}`);
+      sm++;
+      if (sm > 12) { sm = 1; sy++; }
+    }
+  }
+  for (const mk of allMonthKeys) {
+    let monthRent = 0;
+    for (const mem of activeMembers) {
+      const rs = await RentSetting_default.findOne({ messId, userId: mem.userId, monthKey: mk });
+      if (rs) {
+        monthRent += rs.rent;
+      } else {
+        monthRent += mem.rentCurrent || 0;
+      }
+    }
+    rentTotal += monthRent;
+    const prev = monthlyMap.get(mk) || 0;
+    monthlyMap.set(mk, prev + monthRent);
+  }
+  const settlementFilter = { messId };
+  if (startMonthKey || endMonthKey) {
+    settlementFilter.monthKey = {};
+    if (startMonthKey) settlementFilter.monthKey.$gte = startMonthKey;
+    if (endMonthKey) settlementFilter.monthKey.$lte = endMonthKey;
+  }
+  const settlementsData = await Settlement_default.find(settlementFilter);
+  let othersTotal = 0;
+  for (const s of settlementsData) {
+    othersTotal += s.originalAmount || 0;
+    const prev = monthlyMap.get(s.monthKey) || 0;
+    monthlyMap.set(s.monthKey, prev + (s.originalAmount || 0));
+  }
+  const categories = [];
+  if (rentTotal > 0) categories.push({ category: "Rent", total: Math.round(rentTotal * 100) / 100 });
+  if (foodTotal > 0) categories.push({ category: "Food", total: Math.round(foodTotal * 100) / 100 });
+  if (utilitiesTotal > 0) categories.push({ category: "Utilities", total: Math.round(utilitiesTotal * 100) / 100 });
+  if (othersTotal > 0) categories.push({ category: "Others", total: Math.round(othersTotal * 100) / 100 });
+  categories.sort((a, b) => b.total - a.total);
+  const monthly = [...monthlyMap.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, total]) => ({ month, total: Math.round(total * 100) / 100 }));
+  const grandTotal = categories.reduce((s, c) => s + c.total, 0);
+  res.json({ categories, monthly, grandTotal: Math.round(grandTotal * 100) / 100 });
+}));
+var analytics_routes_default = router6;
 
 // backend/src/middleware/error.js
 function notFound(req, res) {
@@ -893,6 +1108,8 @@ app.use("/api/auth", auth_routes_default);
 app.use("/api/mess", mess_routes_default);
 app.use("/api/members", members_routes_default);
 app.use("/api/payments", payments_routes_default);
+app.use("/api/personal", personal_routes_default);
+app.use("/api/analytics", analytics_routes_default);
 app.use(notFound);
 app.use(errorHandler);
 var app_default = app;
