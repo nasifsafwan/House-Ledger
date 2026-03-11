@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Smart mess and hostel expense tracking for meals, rent, shared bills, payments, and settlements.
+  Smart mess and hostel expense tracking for meals, rent, shared bills, payments, settlements, personal expenses, and analytics.
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@ This project is available in: https://house-ledger-lgkkz01pl-nasifsafwans-projec
 
 ## Overview
 
-House Ledger helps a mess manager and members stay aligned on monthly costs. It combines meal logging, rent management, bill splitting, payment tracking, and member-to-member settlements into one workflow.
+House Ledger helps a mess manager and members stay aligned on monthly costs. It combines mess operations and personal expense tracking in one app, with shared monthly summaries, payment status, settlement handling, reminders, and visual analytics.
 
 ### Quick Navigation
 
@@ -29,6 +29,7 @@ House Ledger helps a mess manager and members stay aligned on monthly costs. It 
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [User Guide](#user-guide)
+- [API Highlights](#api-highlights)
 - [FAQ](#faq)
 - [Deployment](#deployment)
 
@@ -46,13 +47,15 @@ Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
 2. Sign in.
 3. Create a new mess as manager, or join one using an invite code.
 4. Open the mess from the mess selection screen.
+5. Optionally open the `Personal` page to track private expenses outside the shared mess flow.
 
 ### Role Guide
 
 | Role | Main actions |
 | --- | --- |
-| Manager | Set monthly costs, update member rent, mark payments, manage settlements |
-| Member | Log meals, review dues, mark self as paid, repay settlements |
+| Manager | Set meal price, upload bills, update member rent, configure reminders, monitor payments, manage settlements, review analytics |
+| Member | Log meals, review dues, mark self as paid, repay settlements, view analytics |
+| Personal | Add private expenses, categorize spending, delete entries, review charts and trends |
 
 ### Manager Workflow
 
@@ -62,11 +65,13 @@ Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
 1. Select the month from the dashboard.
 2. Enter the meal unit price in `Quick Settings`.
 3. Add utility and other bill items.
-4. Review the bill breakdown and collection summary.
+4. Review bill totals, member share, and collection summary.
 5. Update each member's rent for the selected month.
 6. Monitor who has paid and mark payment status.
 7. Create settlements when one member owes another.
 8. Record repayment entries or force-settle if needed.
+9. Set reminder day and enabled state for the mess.
+10. Inspect mess spending analytics by category and monthly trend.
 
 </details>
 
@@ -77,9 +82,24 @@ Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
 
 1. Open the current month.
 2. Log meals from `Quick Meal Log`.
-3. Review rent, bill share, meal cost, and adjusted due.
+3. Review rent, bill share, meal cost, settlement adjustments, and final due.
 4. Mark yourself as paid after sending payment.
 5. Repay open settlements if you owe another member.
+6. Inspect mess spending analytics for the selected period.
+
+</details>
+
+### Personal Expense Workflow
+
+<details>
+  <summary><strong>Open personal checklist</strong></summary>
+
+1. Open the `Personal` page from the app layout.
+2. Add expenses with category, amount, optional note, and optional date.
+3. Use custom labels when `Others` is selected.
+4. Review category and monthly breakdown cards.
+5. Delete entries when needed.
+6. Explore charts for personal spending trends.
 
 </details>
 
@@ -90,23 +110,27 @@ Register -> Login -> Create or Join Mess -> Open Dashboard -> Manage Month
 | Create mess | You become the manager and get an invite code |
 | Join with invite code | You become a member of that mess |
 | Open mess card | You are routed to manager or member dashboard based on your role |
+| Open `Personal` | You manage expenses that are not tied to any mess |
 
 ## Features
 
 | Area | What it does |
 | --- | --- |
 | Authentication | Register and log in with JWT-based auth |
-| Mess Access | Create a new mess or join with an invite code |
-| Manager Tools | Set meal price, add bills, update rents, manage payment status |
-| Member Tools | Log meals, check dues, mark self as paid, repay settlements |
-| Monthly Summary | Breaks down rent, bills, meals, and adjusted dues |
-| Settlements | Track who owes whom and allow partial repayments |
+| Mess Access | Create a new mess, join with an invite code, and switch between active mess memberships |
+| Manager Tools | Set meal price, upload monthly bills, update per-member rent, manage payment status, configure reminder settings |
+| Member Tools | Log meals, check dues, mark self as paid, and repay settlements |
+| Monthly Summary | Breaks down rent, bills, meals, payment state, and settlement-adjusted dues |
+| Settlements | Track who owes whom, allow partial repayments, and let managers force-settle |
+| Personal Expenses | Track private spending with category, amount, date, and description |
+| Analytics | View mess and personal spending by category and monthly trend |
+| Visitor Log | Record visitors and review them from the manager side |
 
 ## Tech Stack
 
 | Layer | Tools |
 | --- | --- |
-| Frontend | React 19, Vite, Tailwind CSS v4, Axios, React Router DOM v7 |
+| Frontend | React 19, Vite, Tailwind CSS v4, Axios, React Router DOM v7, Chart.js, react-chartjs-2 |
 | Backend | Node.js, Express, MongoDB, Mongoose, JWT, Zod |
 
 ## Quick Start
@@ -139,6 +163,7 @@ PORT=8080
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_key
 CORS_ORIGIN=http://localhost:5173
+RESEND_API_KEY=optional_for_email_features
 ```
 
 Optional frontend override in `frontend/.env`:
@@ -167,12 +192,25 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+## API Highlights
+
+These are the main route groups currently exposed by the backend:
+
+| Route group | Purpose |
+| --- | --- |
+| `/api/auth` | Register and login |
+| `/api/mess` | Mess creation, joining, meals, bills, visitors, reminders, settlements, and monthly summaries |
+| `/api/members` | Member list, rent updates, and member removal |
+| `/api/payments` | Member self-paid flow and manager payment marking |
+| `/api/personal` | Personal expense create, list, and delete |
+| `/api/analytics` | Personal and mess analytics with optional date ranges |
+
 ## FAQ
 
 <details>
   <summary><strong>What is the difference between a manager and a member?</strong></summary>
 
-Managers can configure monthly costs, update rents, manage payment status, and control settlements. Members can log meals, view their own monthly summary, mark themselves as paid, and repay settlements they owe.
+Managers can configure monthly costs, update rents, manage payment status, set reminders, and control settlements. Members can log meals, view their own monthly summary, mark themselves as paid, and repay settlements they owe.
 
 </details>
 
@@ -212,6 +250,13 @@ No. Members can mark only themselves as paid. Managers can mark any member as pa
 </details>
 
 <details>
+  <summary><strong>Does the app support personal expense tracking outside a mess?</strong></summary>
+
+Yes. The `Personal` page lets a signed-in user record private expenses, review recent entries, and view analytics without attaching those expenses to any mess.
+
+</details>
+
+<details>
   <summary><strong>Who can create and repay settlements?</strong></summary>
 
 Any active member can create a settlement in a mess. Repayments can be recorded by the owing member or by the manager.
@@ -222,6 +267,20 @@ Any active member can create a settlement in a mess. Repayments can be recorded 
   <summary><strong>Can a settlement be partially repaid?</strong></summary>
 
 Yes. Partial repayments are supported until the remaining amount reaches zero.
+
+</details>
+
+<details>
+  <summary><strong>What analytics are available now?</strong></summary>
+
+The app includes both personal and mess analytics. Each view supports category breakdown, monthly trend, total spending, and date filtering presets including custom ranges.
+
+</details>
+
+<details>
+  <summary><strong>Are reminders configurable?</strong></summary>
+
+Yes. Each mess has a reminder setting with an enabled flag and a day-of-month value that managers can update.
 
 </details>
 
@@ -257,6 +316,7 @@ This repo is structured for the same-project frontend and API deployment.
 ### Optional
 
 - `RESEND_API_KEY`
+- `CORS_ORIGIN`
 
 ## Contributing
 
