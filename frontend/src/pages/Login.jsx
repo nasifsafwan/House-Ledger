@@ -61,7 +61,7 @@ export default function Login() {
                                 <input
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:bg-white"
                                     type="text"
-                                    placeholder="johndoe or john@example.com"
+                                    placeholder="username or yourmail@example.com"
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
                                     required

@@ -307,8 +307,8 @@ export default function LandingPage() {
                         </nav>
                     </div>
                     <div className="mt-8 border-t border-slate-100 pt-6">
-                        <p className="text-[11px] text-slate-400">
-                            Developed by - <span className="font-medium text-slate-500">Nasif Safwan</span>
+                        <p className="text-sm text-slate-500">
+                            Developed by - <span className="font-semibold text-slate-600">Nasif Safwan</span>
                         </p>
                     </div>
                 </div>

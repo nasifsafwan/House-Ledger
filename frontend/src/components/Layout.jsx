@@ -108,9 +108,9 @@ export default function Layout({ children }) {
 
       {/* ─── Footer ─── */}
       <footer className="border-t border-slate-200/60 bg-white/60 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl px-5 py-3">
-          <p className="text-[11px] text-slate-400">
-            HouseLedger — developed by <span className="font-medium text-slate-500">Nasif Safwan</span>
+        <div className="mx-auto max-w-6xl px-5 py-4">
+          <p className="text-sm text-slate-500">
+            HouseLedger — developed by <span className="font-semibold text-slate-600">Nasif Safwan</span>
           </p>
         </div>
       </footer>
