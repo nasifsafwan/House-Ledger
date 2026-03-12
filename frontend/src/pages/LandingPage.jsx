@@ -306,8 +306,10 @@ export default function LandingPage() {
                             <Link to="/register" className="text-sm text-slate-500 transition-colors hover:text-slate-800">Sign up</Link>
                         </nav>
                     </div>
-                    <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
-                        © {new Date().getFullYear()} House Ledger by Nasif Safwan. All rights reserved.
+                    <div className="mt-8 border-t border-slate-100 pt-6">
+                        <p className="text-[11px] text-slate-400">
+                            Developed by - <span className="font-medium text-slate-500">Nasif Safwan</span>
+                        </p>
                     </div>
                 </div>
             </footer>
