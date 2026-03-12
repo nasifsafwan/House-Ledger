@@ -15,7 +15,7 @@ export default function Register() {
 
     useEffect(() => {
         if (authStore.getToken()) {
-            nav("/");
+            nav("/dashboard");
         }
     }, [nav]);
 

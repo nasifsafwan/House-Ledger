@@ -8,11 +8,11 @@ export default function Layout({ children }) {
 
   const logout = () => {
     authStore.clear();
-    nav("/login");
+    nav("/");
   };
 
   const navLinks = [
-    { to: "/", label: "Dashboard", icon: "🏠" },
+    { to: "/dashboard", label: "Dashboard", icon: "🏠" },
     { to: "/personal", label: "Personal", icon: "💰" },
   ];
 
@@ -22,7 +22,7 @@ export default function Layout({ children }) {
       <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/85 backdrop-blur-lg">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
+            <Link to="/dashboard" className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
               <img src="/logo.png" alt="House Ledger logo" className="h-9 w-9 rounded-xl object-cover shadow-sm" />
               <span className="hidden sm:inline">House Ledger</span>
             </Link>
@@ -108,16 +108,10 @@ export default function Layout({ children }) {
 
       {/* ─── Footer ─── */}
       <footer className="border-t border-slate-200/60 bg-white/60 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl px-5 py-5">
-          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <img src="/logo.png" alt="House Ledger logo" className="h-6 w-6 rounded-md object-cover" />
-              House Ledger
-            </div>
-            <div className="text-xs text-slate-400">
-              © {new Date().getFullYear()} House Ledger by Nasif Safwan
-            </div>
-          </div>
+        <div className="mx-auto max-w-6xl px-5 py-3">
+          <p className="text-[11px] text-slate-400">
+            HouseLedger — developed by <span className="font-medium text-slate-500">Nasif Safwan</span>
+          </p>
         </div>
       </footer>
     </div>

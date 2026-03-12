@@ -13,7 +13,7 @@ export default function Login() {
 
     useEffect(() => {
         if (authStore.getToken()) {
-            nav("/");
+            nav("/dashboard");
         }
     }, [nav]);
 
@@ -24,7 +24,7 @@ export default function Login() {
         try {
             const res = await AuthAPI.login({ identifier, password });
             authStore.set({ token: res.data.token, user: res.data.user });
-            nav("/");
+            nav("/dashboard");
         } catch (e) {
             setErr(
                 e?.response?.data?.message ||

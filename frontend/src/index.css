@@ -4,17 +4,31 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --color-brand-50: oklch(0.97 0.01 250);
-  --color-brand-100: oklch(0.93 0.03 250);
-  --color-brand-500: oklch(0.55 0.15 255);
-  --color-brand-600: oklch(0.48 0.17 255);
-  --color-brand-700: oklch(0.40 0.17 255);
-  --color-success-50: oklch(0.97 0.02 155);
-  --color-success-600: oklch(0.52 0.14 155);
+
+  /* Brand */
+  --color-brand-50: oklch(0.97 0.02 165);
+  --color-brand-100: oklch(0.92 0.05 165);
+  --color-brand-500: oklch(0.57 0.20 165);
+  --color-brand-600: oklch(0.49 0.21 165);
+  --color-brand-700: oklch(0.42 0.21 165);
+
+  /* Income */
+  --color-success-50: oklch(0.97 0.02 150);
+  --color-success-600: oklch(0.53 0.16 150);
+
+  /* Expense */
   --color-danger-50: oklch(0.97 0.02 25);
-  --color-danger-600: oklch(0.55 0.18 25);
+  --color-danger-600: oklch(0.56 0.19 25);
+
+  /* Budget */
   --color-warn-50: oklch(0.97 0.03 85);
-  --color-warn-600: oklch(0.62 0.16 60);
+  --color-warn-600: oklch(0.65 0.16 85);
+
+  /* UI */
+  --color-bg: oklch(0.99 0 0);
+  --color-card: oklch(0.96 0 0);
+  --color-border: oklch(0.90 0 0);
+  --color-text: oklch(0.20 0 0);
 }
 
 /* Smooth scrolling and base typography */
@@ -29,7 +43,9 @@ body {
 }
 
 /* Premium input focus styles */
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   box-shadow: 0 0 0 3px oklch(0.55 0.15 255 / 0.15);
   border-color: oklch(0.55 0.15 255);
@@ -38,4 +54,45 @@ input:focus, select:focus, textarea:focus {
 /* Button transitions */
 button {
   transition: all 0.15s ease;
+}
+
+/* ─── Landing page animations ─── */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-page .hero-badge {
+  animation: fadeInUp 0.8s 0.1s both;
+}
+
+.landing-page h1 {
+  animation: fadeInUp 0.8s 0.25s both;
+}
+
+.landing-page h1+p {
+  animation: fadeInUp 0.8s 0.4s both;
+}
+
+.landing-page h1~div {
+  animation: fadeInUp 0.8s 0.55s both;
 }

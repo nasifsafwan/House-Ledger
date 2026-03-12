@@ -3,6 +3,6 @@ import { authStore } from "../store/authStore";
 
 export default function ProtectedRoute({ children }) {
   const token = authStore.getToken();
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to="/" replace />;
   return children;
 }

@@ -17,7 +17,7 @@ export default function CreateOrJoin() {
     setErr("");
     try {
       const res = await MessAPI.create(createForm);
-      nav(`/?new=${res.data.mess._id}`);
+      nav(`/dashboard?new=${res.data.mess._id}`);
     } catch (e2) {
       setErr(e2?.response?.data?.message || "Create mess failed");
     }
@@ -28,7 +28,7 @@ export default function CreateOrJoin() {
     setErr("");
     try {
       await MessAPI.join({ inviteCode: joinCode });
-      nav("/");
+      nav("/dashboard");
     } catch (e2) {
       setErr(e2?.response?.data?.message || "Join failed");
     }
