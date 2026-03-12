@@ -183,7 +183,11 @@ export default function ManagerDashboard() {
             onChange={(e) => setMonthKey(e.target.value)}
           />
           <button
-            onClick={load}
+            onClick={() => {
+              if (window.confirm("Warning: A hard refresh of the app will log you out. Are you sure you want to refresh the data?")) {
+                load();
+              }
+            }}
             className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-200"
             title="Refresh Data"
           >
