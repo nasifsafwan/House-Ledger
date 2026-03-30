@@ -28,7 +28,7 @@ export default function Layout({ children }) {
         {/* Blurred gradient blobs for a sleek modern look */}
         <div className="absolute -top-40 -left-20 h-96 w-96 rounded-full bg-brand-400 opacity-20 mix-blend-multiply blur-[100px]"></div>
         <div className="absolute -right-20 top-20 h-96 w-96 rounded-full bg-sky-400 opacity-20 mix-blend-multiply blur-[100px]"></div>
-        <div className="absolute -bottom-40 left-1/3 h-[500px] w-[500px] rounded-full bg-emerald-300 opacity-20 mix-blend-multiply blur-[128px]"></div>
+        <div className="absolute -bottom-40 left-1/3 h-[500px] w-[500px] rounded-full bg-emerald-300 opacity-10 mix-blend-multiply blur-[128px]"></div>
       </div>
 
       {/* ─── Navbar ─── */}
