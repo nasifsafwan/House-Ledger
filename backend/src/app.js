@@ -7,6 +7,7 @@ import membersRoutes from "./routes/members.routes.js";
 import paymentsRoutes from "./routes/payments.routes.js";
 import personalRoutes from "./routes/personal.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 import { notFound, errorHandler } from "./middleware/error.js";
 
@@ -47,6 +48,7 @@ app.use("/api/members", membersRoutes); // member management
 app.use("/api/payments", paymentsRoutes);
 app.use("/api/personal", personalRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

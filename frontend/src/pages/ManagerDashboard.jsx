@@ -16,6 +16,7 @@ export default function ManagerDashboard() {
   const [summary, setSummary] = useState(null);
   const [members, setMembers] = useState([]);
   const [settlements, setSettlements] = useState([]);
+  const [issues, setIssues] = useState([]);
   const [rentDrafts, setRentDrafts] = useState({});
   const [newSettlement, setNewSettlement] = useState({
     toUserId: "",
@@ -42,15 +43,17 @@ export default function ManagerDashboard() {
   const load = async () => {
     setErr("");
     try {
-      const [s, m, st] = await Promise.all([
+      const [s, m, st, iss] = await Promise.all([
         MessAPI.managerSummary(messId, monthKey),
         MembersAPI.list(messId),
         MessAPI.listSettlements(messId, monthKey),
+        MessAPI.listIssues(messId)
       ]);
       setSummary(s.data);
       const memberList = m.data.members || [];
       setMembers(memberList);
       setSettlements(st.data.settlements || []);
+      setIssues(iss.data.issues || []);
 
       const nextDrafts = {};
       for (const row of s.data.members || []) {
@@ -94,6 +97,16 @@ export default function ManagerDashboard() {
       setErr(e?.response?.data?.message || "Failed to update rent");
     } finally {
       setSavingRentFor("");
+    }
+  };
+
+  const resolveIssue = async (issueId) => {
+    setErr("");
+    try {
+      await MessAPI.resolveIssue(messId, issueId);
+      await load();
+    } catch (e) {
+      setErr(e?.response?.data?.message || "Failed to resolve issue");
     }
   };
 
@@ -183,11 +196,7 @@ export default function ManagerDashboard() {
             onChange={(e) => setMonthKey(e.target.value)}
           />
           <button
-            onClick={() => {
-              if (window.confirm("Warning: A hard refresh of the app will log you out. Are you sure you want to refresh the data?")) {
-                load();
-              }
-            }}
+            onClick={load}
             className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-200"
             title="Refresh Data"
           >
@@ -250,6 +259,7 @@ export default function ManagerDashboard() {
               const memberId = member?._id;
               const rentValue = memberId ? (rentDrafts[memberId] ?? String(r.rent ?? 0)) : "";
               const isPaid = r.paymentStatus === "PAID";
+              const isPending = r.paymentStatus === "PENDING";
               const displayDue = isPaid ? 0 : r.totalDue;
 
               return (
@@ -267,11 +277,12 @@ export default function ManagerDashboard() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold ${isPaid
-                        ? "bg-success-50 text-success-600"
-                        : "bg-danger-50 text-danger-600"
-                        }`}>
-                        {isPaid ? "✅ PAID" : "⏳ UNPAID"}
+                      <span className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                        isPaid ? "bg-success-50 text-success-600" :
+                        isPending ? "bg-amber-50 text-amber-600" :
+                        "bg-danger-50 text-danger-600"
+                      }`}>
+                        {isPaid ? "✅ PAID" : isPending ? "⏳ PENDING" : "🔴 UNPAID"}
                       </span>
                       {isPaid ? (
                         <button
@@ -280,6 +291,23 @@ export default function ManagerDashboard() {
                         >
                           Undo
                         </button>
+                      ) : isPending ? (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => markReceived(r.user.id, "PAID")}
+                            className="rounded-lg bg-success-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-success-700"
+                            title="Approve payment"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => markReceived(r.user.id, "UNPAID")}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all hover:bg-slate-50"
+                            title="Reject payment"
+                          >
+                            Reject
+                          </button>
+                        </div>
                       ) : (
                         <button
                           onClick={() => markReceived(r.user.id, "PAID")}
@@ -349,6 +377,44 @@ export default function ManagerDashboard() {
           <div className="py-8 text-center text-sm text-slate-400">Loading members…</div>
         )}
       </Card>
+
+      {/* Issues */}
+      <div className="mt-6">
+        <Card icon="🚨" title="Member Issues" subtitle="Complaints and reports from members">
+          {issues.length === 0 ? (
+            <div className="py-6 text-center text-sm text-slate-400">No issues reported 🎉</div>
+          ) : (
+            <div className="space-y-3">
+              {issues.map((iss) => (
+                <div key={iss._id} className="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white p-4 transition-all hover:shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-900">{iss.userId?.name}</span>
+                        <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
+                          iss.status === 'RESOLVED' ? 'bg-success-50 text-success-600' : 'bg-warn-50 text-warn-600'
+                        }`}>
+                          {iss.status}
+                        </span>
+                        <span className="text-xs text-slate-400">{new Date(iss.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{iss.description}</p>
+                    </div>
+                    {iss.status === 'OPEN' && (
+                      <button
+                        onClick={() => resolveIssue(iss._id)}
+                        className="flex-shrink-0 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-all hover:bg-brand-700"
+                      >
+                        Approve / Resolve
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
 
       <div className="mt-6">
         <Card icon="🤝" title="Settlement Management" subtitle={`Adjustments for ${monthKey}`}>

@@ -5,7 +5,7 @@ const PaymentSchema = new mongoose.Schema(
     messId: { type: mongoose.Schema.Types.ObjectId, ref: "Mess", required: true },
     monthKey: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    status: { type: String, enum: ["PAID", "UNPAID"], default: "UNPAID" },
+    status: { type: String, enum: ["PAID", "PENDING", "UNPAID"], default: "UNPAID" },
     paidAt: { type: Date, default: null },
     markedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }
   },

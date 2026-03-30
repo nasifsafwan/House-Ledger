@@ -7,6 +7,8 @@ import CreateOrJoin from "./pages/CreateOrJoin";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import MemberDashboard from "./pages/MemberDashboard";
 import PersonalDashboard from "./pages/PersonalDashboard";
+import NoticeBoard from "./pages/NoticeBoard";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -55,6 +57,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <PersonalDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notices"
+        element={
+          <ProtectedRoute>
+            <NoticeBoard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
           </ProtectedRoute>
         }
       />

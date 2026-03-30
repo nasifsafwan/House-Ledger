@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import User from '../models/User.js';
+import Admin from '../models/Admin.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 
 const router = express.Router();
@@ -31,12 +32,13 @@ router.post('/register', asyncHandler(async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(parsed.data.password, 10);
-    await User.create({
+    const user = await User.create({
         name: parsed.data.name,
         username: parsed.data.username,
         email: parsed.data.email,
         passwordHash
     });
+    
     res.json({ message: "User registered successfully" });
 }));
 
@@ -53,6 +55,28 @@ router.post('/login', asyncHandler(async (req, res) => {
 
     const identifier = parsed.data.identifier.toLowerCase().trim();
 
+    // Check Admin collection first
+    const admin = await Admin.findOne({ username: identifier });
+    if (admin) {
+        if (admin.password !== parsed.data.password) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+        
+        const token = jwt.sign(
+            { id: admin._id, username: admin.username, role: 'admin' },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+        return res.json({
+            token,
+            user: {
+                id: admin._id,
+                username: admin.username,
+                role: 'admin'
+            }
+        });
+    }
+
     // Allow login with either username or email
     const user = await User.findOne({
         $or: [{ username: identifier }, { email: identifier }]
@@ -67,8 +91,20 @@ router.post('/login', asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ token, user: { id: user._id, name: user.name, username: user.username } });
+    const token = jwt.sign(
+        { id: user._id, username: user.username },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    );
+    return res.json({
+        token,
+        user: {
+            id: user._id,
+            name: user.name,
+            username: user.username,
+            email: user.email
+        }
+    });
 }));
 
 export default router;

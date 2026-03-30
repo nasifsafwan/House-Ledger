@@ -5,7 +5,7 @@ export function toMonthKey(date = new Date()) {
 }
 
 export function monthKeyFromDateStr(yyyy_mm_dd) {
-  const [y, m] = yyyy_mm_dd.split("-"); // YYYY-MM-DD
+  const [y, m] = yyyy_mm_dd.split("-");
   return `${y}-${m}`;
 }
 

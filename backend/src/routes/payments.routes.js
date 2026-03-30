@@ -45,7 +45,7 @@ router.post("/:messId/self-paid", auth, requireMember(), asyncHandler(async (req
 
   const payment = await Payment.findOneAndUpdate(
     { messId, monthKey, userId: req.user.id },
-    { status: "PAID", paidAt: new Date(), markedBy: req.user.id },
+    { status: "PENDING", markedBy: req.user.id },
     { upsert: true, new: true }
   );
 

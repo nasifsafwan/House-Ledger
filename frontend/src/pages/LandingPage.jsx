@@ -182,6 +182,18 @@ export default function LandingPage() {
                             </div>
                         ))}
                     </div>
+
+                    <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-slate-300">
+                        <span className="text-slate-400">Wanna contribute? Fork requests are open.</span>
+                        <a
+                            href="https://github.com/nasifsafwan/House-Ledger"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 font-medium text-white transition-all hover:border-white/30 hover:bg-white/10"
+                        >
+                            GitHub Repo
+                        </a>
+                    </div>
                 </div>
 
                 {/* Bottom wave */}
@@ -306,10 +318,19 @@ export default function LandingPage() {
                             <Link to="/register" className="text-sm text-slate-500 transition-colors hover:text-slate-800">Sign up</Link>
                         </nav>
                     </div>
-                    <div className="mt-8 border-t border-slate-100 pt-6">
-                        <p className="text-sm text-slate-500">
-                            Developed by - <span className="font-semibold text-slate-600">Nasif Safwan</span>
-                        </p>
+                    <div className="mt-8 flex flex-col gap-3 font-bold border-t border-slate-100 pt-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="font-bold text-slate-600">Developed by - Nasif Safwan</p>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span>Wanna contribute? Fork and submit a PR.</span>
+                            <a
+                                href="https://github.com/nasifsafwan/House-Ledger"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="transition-colors hover:text-slate-800"
+                            >
+                                GitHub
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>

@@ -13,8 +13,10 @@ export default function Layout({ children }) {
 
   const navLinks = [
     { to: "/dashboard", label: "Dashboard", icon: "🏠" },
-    { to: "/personal", label: "Personal", icon: "💰" },
+    { to: "/notices", label: "Notice Board", icon: "📢" },
   ];
+  const adminLinks = user?.role === 'admin' ? [{ to: "/admin", label: "Admin", icon: "🛠️" }] : [];
+  const allNavLinks = user?.role === 'admin' ? adminLinks : [...navLinks, ...adminLinks];
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -29,7 +31,7 @@ export default function Layout({ children }) {
 
             {user ? (
               <nav className="hidden items-center gap-1 md:flex">
-                {navLinks.map((l) => (
+                {allNavLinks.map((l) => (
                   <Link
                     key={l.to}
                     to={l.to}
@@ -84,7 +86,7 @@ export default function Layout({ children }) {
         {/* Mobile nav links */}
         {user ? (
           <div className="flex gap-1 border-t border-slate-100 px-5 py-2.5 md:hidden">
-            {navLinks.map((l) => (
+            {allNavLinks.map((l) => (
               <Link
                 key={l.to}
                 to={l.to}

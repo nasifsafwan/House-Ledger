@@ -7,9 +7,7 @@ import PersonalExpense from "../models/PersonalExpense.js";
 const router = express.Router();
 
 const CATEGORIES = ["Food", "Rent", "Utilities", "Transport", "Shopping", "Entertainment", "Others"];
-// Note: CATEGORIES is kept for reference; custom category names are allowed.
 
-// Create a personal expense
 router.post(
     "/",
     auth,
@@ -18,7 +16,7 @@ router.post(
             category: z.string().min(1),
             amount: z.number().min(0.01),
             description: z.string().optional(),
-            date: z.string().optional(), // ISO date string
+            date: z.string().optional(),
         });
 
         const parsed = schema.safeParse(req.body);
@@ -36,7 +34,6 @@ router.post(
     })
 );
 
-// List personal expenses (with optional date filter)
 router.get(
     "/",
     auth,

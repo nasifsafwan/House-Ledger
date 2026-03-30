@@ -15,7 +15,8 @@ import ReminderSetting from "../models/ReminderSetting.js";
 import RentSetting from "../models/RentSetting.js";
 import Payment from "../models/Payment.js";
 import Settlement from "../models/Settlement.js";
-
+import Notice from "../models/Notice.js";
+import Issue from "../models/Issue.js";
 import { generateInviteCode } from "../utils/inviteCode.js";
 import { sum, round2 } from "../utils/calc.js";
 import { toMonthKey } from "../utils/monthKey.js";
@@ -417,6 +418,78 @@ router.get("/:messId/reminder", auth, requireMember(), asyncHandler(async (req, 
 }));
 
 /* ------------------------------------------------------------------ */
+/*  NOTICE BOARD: manager posts, members view                         */
+/* ------------------------------------------------------------------ */
+
+router.get("/:messId/notices", auth, requireMember(), asyncHandler(async (req, res) => {
+  const notices = await Notice.find({ messId: req.params.messId })
+    .sort({ pinned: -1, createdAt: -1 })
+    .populate("createdBy", "name username");
+
+  res.json({ notices });
+}));
+
+router.post("/:messId/notices", auth, requireManager(), asyncHandler(async (req, res) => {
+  const schema = z.object({
+    title: z.string().trim().min(1).max(120),
+    body: z.string().trim().min(1).max(2000),
+    pinned: z.boolean().optional()
+  });
+
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues });
+
+  const notice = await Notice.create({
+    messId: req.params.messId,
+    title: parsed.data.title,
+    body: parsed.data.body,
+    pinned: Boolean(parsed.data.pinned),
+    createdBy: req.user.id
+  });
+
+  const populated = await notice.populate("createdBy", "name username");
+  res.status(201).json({ notice: populated });
+}));
+
+router.patch("/:messId/notices/:noticeId", auth, requireManager(), asyncHandler(async (req, res) => {
+  const schema = z.object({
+    title: z.string().trim().min(1).max(120).optional(),
+    body: z.string().trim().min(1).max(2000).optional(),
+    pinned: z.boolean().optional()
+  }).refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field is required"
+  });
+
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.issues[0]?.message || "Invalid payload" });
+  }
+
+  const notice = await Notice.findById(req.params.noticeId);
+  if (!notice || String(notice.messId) !== String(req.params.messId)) {
+    return res.status(404).json({ message: "Notice not found" });
+  }
+
+  if (parsed.data.title) notice.title = parsed.data.title;
+  if (parsed.data.body) notice.body = parsed.data.body;
+  if (typeof parsed.data.pinned === "boolean") notice.pinned = parsed.data.pinned;
+  await notice.save();
+
+  const populated = await notice.populate("createdBy", "name username");
+  res.json({ notice: populated });
+}));
+
+router.delete("/:messId/notices/:noticeId", auth, requireManager(), asyncHandler(async (req, res) => {
+  const notice = await Notice.findById(req.params.noticeId);
+  if (!notice || String(notice.messId) !== String(req.params.messId)) {
+    return res.status(404).json({ message: "Notice not found" });
+  }
+
+  await notice.deleteOne();
+  res.json({ message: "Notice deleted" });
+}));
+
+/* ------------------------------------------------------------------ */
 /*  SUMMARY: member + manager endpoints                                   */
 /*  GET /api/mess/:messId/summary/member?monthKey=YYYY-MM                  */
 /*  GET /api/mess/:messId/summary/manager?monthKey=YYYY-MM                 */
@@ -563,6 +636,70 @@ router.get("/:messId/summary/manager", auth, requireManager(), asyncHandler(asyn
     members: rows,
     totals: { expected: round2(totalExpected), collected: round2(totalCollected) }
   });
+}));
+
+/* ------------------------------------------------------------------ */
+/*  ISSUES: member raises, manager resolves                           */
+/* ------------------------------------------------------------------ */
+
+// List issues (Admin sees all, member sees own)
+router.get("/:messId/issues", auth, requireMember(), asyncHandler(async (req, res) => {
+  const filter = { messId: req.params.messId };
+  if (req.membership.role === "MEMBER") {
+    filter.userId = req.user.id;
+  }
+
+  const issues = await Issue.find(filter)
+    .populate("userId", "name username")
+    .sort({ status: -1, createdAt: -1 }); // OPEN first, then by date
+
+  res.json({ issues });
+}));
+
+// Member creates an issue
+router.post("/:messId/issues", auth, requireMember(), asyncHandler(async (req, res) => {
+  const schema = z.object({
+    description: z.string().trim().min(5).max(1000)
+  });
+
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message || "Invalid payload" });
+
+  const issue = await Issue.create({
+    messId: req.params.messId,
+    userId: req.user.id,
+    description: parsed.data.description,
+    status: "OPEN"
+  });
+
+  const populated = await issue.populate("userId", "name username");
+  res.status(201).json({ issue: populated });
+}));
+
+// Manager resolves an issue
+router.patch("/:messId/issues/:issueId/resolve", auth, requireManager(), asyncHandler(async (req, res) => {
+  const issue = await Issue.findOneAndUpdate(
+    { _id: req.params.issueId, messId: req.params.messId },
+    { status: "RESOLVED" },
+    { new: true }
+  ).populate("userId", "name username");
+
+  if (!issue) return res.status(404).json({ message: "Issue not found" });
+
+  res.json({ issue });
+}));
+
+// Member deletes their own issue
+router.delete("/:messId/issues/:issueId", auth, requireMember(), asyncHandler(async (req, res) => {
+  const issue = await Issue.findOneAndDelete({
+    _id: req.params.issueId,
+    messId: req.params.messId,
+    userId: req.user.id // Only creator can delete
+  });
+
+  if (!issue) return res.status(404).json({ message: "Issue not found or unauthorized to delete" });
+
+  res.json({ message: "Issue deleted" });
 }));
 
 export default router;
