@@ -19,9 +19,18 @@ export default function Layout({ children }) {
   ];
   const adminLinks = user?.role === 'admin' ? [{ to: "/admin", label: "Admin", icon: "🛠️" }] : [];
   const allNavLinks = user?.role === 'admin' ? adminLinks : [...navLinks, ...adminLinks];
-
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="relative flex min-h-screen flex-col bg-transparent">
+      {/* ─── Background Elements ─── */}
+      <div className="fixed inset-0 z-[-1] bg-slate-50">
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        {/* Blurred gradient blobs for a sleek modern look */}
+        <div className="absolute -top-40 -left-20 h-96 w-96 rounded-full bg-brand-400 opacity-20 mix-blend-multiply blur-[100px]"></div>
+        <div className="absolute -right-20 top-20 h-96 w-96 rounded-full bg-sky-400 opacity-20 mix-blend-multiply blur-[100px]"></div>
+        <div className="absolute -bottom-40 left-1/3 h-[500px] w-[500px] rounded-full bg-emerald-300 opacity-20 mix-blend-multiply blur-[128px]"></div>
+      </div>
+
       {/* ─── Navbar ─── */}
       <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/85 backdrop-blur-lg">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
