@@ -8,6 +8,7 @@ import { authStore } from "../store/authStore";
 /* ── Helpers ── */
 function getGreeting() {
   const h = new Date().getHours();
+  if (h < 6) return { text: "Hello, night owl", emoji: "🦉" };
   if (h < 12) return { text: "Good morning", emoji: "☀️" };
   if (h < 17) return { text: "Good afternoon", emoji: "🌤️" };
   return { text: "Good evening", emoji: "🌙" };
@@ -217,11 +218,10 @@ export default function SelectMess() {
                 <button
                   key={r}
                   onClick={() => setRoleFilter(r)}
-                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-bold tracking-wide transition-all duration-200 ${
-                    roleFilter === r
+                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-bold tracking-wide transition-all duration-200 ${roleFilter === r
                       ? "filter-chip-active"
                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                  }`}
+                    }`}
                 >
                   {r === "ALL" ? "All" : r === "MANAGER" ? "👑" : "👤"}
                 </button>
@@ -292,11 +292,10 @@ export default function SelectMess() {
                 )}
                 <div className="mb-4 flex items-center gap-3">
                   <div
-                    className={`relative flex h-11 w-11 items-center justify-center rounded-xl text-lg shadow-sm ring-1 ring-inset transition-all duration-300 group-hover:scale-110 ${
-                      m.role === "MANAGER"
+                    className={`relative flex h-11 w-11 items-center justify-center rounded-xl text-lg shadow-sm ring-1 ring-inset transition-all duration-300 group-hover:scale-110 ${m.role === "MANAGER"
                         ? "bg-warn-50 text-warn-600 ring-warn-100"
                         : "bg-brand-50 text-brand-600 ring-brand-100"
-                    }`}
+                      }`}
                   >
                     {m.role === "MANAGER" ? "👑" : "👤"}
                     <span className={`live-dot absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm ${m.role === "MANAGER" ? "bg-amber-400" : "bg-brand-500"}`} />
